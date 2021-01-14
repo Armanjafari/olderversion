@@ -2,29 +2,23 @@
 
 namespace App\services\Notifications;
 
-use App\User;
-use Illuminate\Contracts\Mail\Mailable;
-use Illuminate\Support\Facades\Mail;
-use \GuzzleHttp\Client;
+use App\services\Notifications\Providers\Contracts\Provider;
+/*
+* @method sendSms(App\User $user, stirng $code)
+* @method sendEmail(App\User $user, Illuminate\Mail\mailable $mailable)
+*/
 class Notification{
-
-
-
-    public function sendEmail(User $user , Mailable $mailable)
+    public function __call($method, $arguments)
     {
-
-        return Mail::to($user)->send($mailable);
-    }
-    public function sendsms(User $user , string $code)
-    {
-        //APIKEY 1MBWwEqHPAHXbO_3P0AGfnhsWRLOuJslxiCq8K32lN0=
-        $client = new Client(['headers' => ['Authorization' =>'AccessKey
-        1MBWwEqHPAHXbO_3P0AGfnhsWRLOuJslxiCq8K32lN0='],'form_params' => ['originator' => '+983000505','recipients' => '+989014627125','message' => 'this is a great test!!!'],
-        'base_uri' => 'http://rest.ippanel.com/']);
-       // dd($client);
-        $response = $client->request('POST', 'v1/messages');
-        dd($response);
-
+        $providerPath = __NAMESPACE__ . '\Providers\\' . substr($method,4) . 'Provider';
+        if(!class_exists($providerPath)){
+            throw new \Exception('Class Does not exist');
+        }
+        $providerInstance = new $providerPath(... $arguments);
+        if(!is_subclass_of($providerInstance,Provider::class)){
+            throw new \Exception("class must implements App\services\Notifications\Providers\Contracts\Provider");
+        }
+        $providerInstance->send();
     }
 }
 ?>

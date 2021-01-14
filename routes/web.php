@@ -1,6 +1,7 @@
 <?php
 
 use App\Mail\EmailSender;
+use App\Mail\ForgotPassword;
 use App\services\Notifications\Notification;
 use App\User;
 
@@ -17,5 +18,5 @@ use App\User;
 
 Route::get('/', function () {
     $notification = resolve(Notification::class);
-    $notification->sendSms(User::find(1),'new EmailSender');
+    $notification->sendEmail(User::find(2), new ForgotPassword);
 });
